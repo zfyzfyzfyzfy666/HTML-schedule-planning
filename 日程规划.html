@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我是谁我在哪我要干什么</title>
+    <!-- 已移除 Font Awesome 外链：确保纯本地离线可用 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        :root{
+            /* 默认暗色主题（dark），主色为湖蓝，低刺激 */
+            --bg: #07141b;
+            --text-primary: #eaf6fb;
+            --text-secondary: #a9c6d4;
+
+            --accent: #45c3dd;
+            --header-grad: linear-gradient(135deg, #0b2a36 0%, #1e6f8d 55%, #2d8fb3 100%);
+            --btn-grad: linear-gradient(135deg, #89d3ea, #2d8fb3);
+            --btn-text: #06202a;
+
+            --card-bg: rgba(255,255,255,0.06);
+            --panel-bg: rgba(255,255,255,0.08);
+            --panel-text: var(--text-primary);
+            --task-item-bg: rgba(255,255,255,0.05);
+
+            --plus-color: #89d3ea;
+            --card-text: var(--text-primary);
+            --card-text-secondary: var(--text-secondary);
+
+            --filter-btn-bg: rgba(255,255,255,0.10);
+            --filter-btn-text: #cfeef7;
+            --filter-btn-hover-bg: rgba(69,195,221,0.16);
+
+            --progress-bg: rgba(255,255,255,0.10);
+            --task-progress-grad-light: linear-gradient(90deg, rgba(69,195,221,0.18), rgba(45,143,179,0.28));
+            --task-progress-grad-solid: linear-gradient(90deg, rgba(69,195,221,0.36), rgba(45,143,179,0.58));
+            --task-progress-grad: var(--task-progress-grad-light);
+
+            --input-bg: rgba(255,255,255,0.10);
+            --input-border: rgba(255,255,255,0.20);
+            --input-border-focus: rgba(69,195,221,0.70);
+
+            --modal-bg: rgba(7,20,27,0.92);
+            --modal-border: rgba(255,255,255,0.14);
+
+            --completed-accent: rgba(69,195,221,0.85);
+            --completed-bg: rgba(69,195,221,0.08);
+
+            --tag-text: #d8f4fb;
+            --tag-bg: rgba(69,195,221,0.12);
+        }
+
+        /* 亮色主题（light）：需要时可切换，默认仍为 dark */
+        .mode-light{
+            --bg: #f0fbff;
+            --text-primary: #0b2233;
+            --text-secondary: #476a7b;
+
+            --accent: #2d8fb3;
+            --header-grad: linear-gradient(135deg, #89d3ea 0%, #2d8fb3 100%);
+            --btn-grad: linear-gradient(135deg, #89d3ea, #2d8fb3);
+            --btn-text: #ffffff;
+
+            --card-bg: #ffffff;
+            --panel-bg: rgba(255,255,255,0.98);
+            --panel-text: #0b2233;
+            --task-item-bg: #f7fcff;
+
+            --plus-color: #45c3dd;
+            --card-text: var(--text-primary);
+            --card-text-secondary: var(--text-secondary);
+
+            --filter-btn-bg: rgba(255,255,255,0.96);
+            --filter-btn-text: var(--accent);
+            --filter-btn-hover-bg: rgba(45,143,179,0.10);
+
+            --progress-bg: #e6f6ff;
+            --task-progress-grad-light: linear-gradient(90deg, rgba(69,195,221,0.20), rgba(45,143,179,0.32));
+            --task-progress-grad-solid: linear-gradient(90deg, rgba(69,195,221,0.44), rgba(45,143,179,0.62));
+
+            --input-bg: #ffffff;
+            --input-border: #e1e5eb;
+            --input-border-focus: var(--accent);
+
+            --modal-bg: #ffffff;
+            --modal-border: rgba(0,0,0,0.10);
+
+            --completed-accent: #1b6e91;
+            --completed-bg: #eefbff;
+
+            --tag-text: #0b5f7a;
+            --tag-bg: rgba(45,143,179,0.10);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 18px 20px;
+            background: var(--header-grad);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(45, 143, 179, 0.22);
+        }
+        
+        h1 {
+            font-size: 2.1rem;
+            margin: 0;
+            line-height: 1.05;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-top: 6px;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-right .mini-panel {
+            background: var(--panel-bg);
+            color: var(--panel-text);
+            padding: 10px 12px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-right .mini-panel .stat-item { text-align: center; }
+
+        .header-right .mini-panel .stat-value { color: var(--accent); font-size:1.1rem; }
+        .header-right .mini-panel .stat-label { font-size:0.8rem; color: var(--text-secondary); }
+        .header-right .btn { padding:8px 10px; font-size:0.9rem; border-radius:8px; }
+        .header-right .btn i { margin-right:0; }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        /* 左侧面板已移入 header 右侧的 mini-panel，原 .left-panel 样式已废弃 */
+        
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: var(--accent);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.9;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(69,195,221,0.14);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--btn-grad);
+            color: var(--btn-text);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(45, 143, 179, 0.22);
+        }
+        
+        .btn-full {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.08) 100%);
+            color: var(--card-text);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: var(--filter-btn-bg);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            color: var(--filter-btn-text);
+            box-shadow: none;
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent);
+            color: var(--btn-text);
+        }
+
+        .filter-btn:hover {
+            background-color: var(--filter-btn-hover-bg);
+        }
+
+        .filter-btn.active:hover {
+            background-color: var(--accent);
+        }
+        
+        /* Top bar (compact new task) 已移除，使用 modal 新建/编辑事项 */
+
+        /* Task list: two-column compact grid */
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 720px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        
+        .task-item {
+            background-color: var(--task-item-bg);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 0;
+            border-left: 3px solid var(--accent);
+            transition: all 0.16s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            min-height: 72px;
+            font-size: 0.92rem;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px rgba(45,143,179,0.14);
+        }
+        
+        .task-item.completed {
+            border-left-color: var(--completed-accent);
+            opacity: 0.86;
+            background-color: var(--completed-bg);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .task-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--card-text);
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #888;
+            transition: color 0.2s;
+        }
+        
+        .delete-btn:hover {
+            color: #f44336;
+        }
+        
+        .task-desc {
+            color: var(--card-text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.3;
+            font-size: 0.88rem;
+        }
+        
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--card-text-secondary);
+        }
+        
+        .task-ddl {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+        
+        .task-ddl.overdue {
+            color: #f44336;
+        }
+        
+        .task-ddl.today {
+            color: var(--tag-text);
+            font-weight: 800;
+            background: var(--tag-bg);
+            padding: 4px 8px; border-radius:6px;
+        }
+        .task-ddl.tomorrow {
+            color: var(--tag-text);
+            font-weight: 800;
+            background: var(--tag-bg);
+            padding: 3px 7px; border-radius:6px;
+        }
+
+        /* 删除对整个任务卡的 today/tomorrow 高亮（用 DDL 文本本身高亮替代） */
+
+        .importance-badge {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            flex-shrink: 0;
+        }
+        .importance-badge { display:flex;align-items:center;justify-content:center;padding:2px 8px;border-radius:8px;color:#fff;font-weight:700;font-size:0.78rem;min-width:38px }
+        .importance-badge .imp-center { display:inline-block;line-height:1; }
+        .importance-1 { background: rgba(200,200,200,0.45); color:#222 }
+        .importance-2 { background: rgba(255,193,7,0.35); color:#222 }
+        .importance-3 { background: rgba(59,130,246,0.75); }
+        .importance-4 { background: rgba(30,64,175,0.85); }
+        .importance-5 { background: rgba(29,78,216,0.95); }
+
+        /* 重要度颜色同步为湖蓝系（降低刺激） */
+        .importance-3 { background: rgba(45,143,179,0.80); }
+        .importance-4 { background: rgba(27,110,145,0.88); }
+        .importance-5 { background: rgba(13,92,122,0.95); }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* 已移除旧的 .stats 面板（现使用 header 内 mini-panel） */
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .header-left { align-items: center; }
+            .header-right { justify-content: center; }
+
+            /* 手机/窄屏使用两列或一列 */
+            .task-list { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+            .right-panel {
+                min-width: 100%;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        /* 进度徽章与 +1 按钮样式 */
+        .progress-group { display: inline-flex; align-items: center; gap:8px; }
+        .progress-btn {
+            background: linear-gradient(135deg,#eef6ff,#dbeafe);
+            border: 1px solid #bfdbfe;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            line-height: 1;
+            min-width: 44px;
+            color: #0b5f7a;
+        }
+        .progress-btn:hover { transform: translateY(-1px); }
+        .pulse {
+            animation: pulseAnim 160ms ease-in-out;
+        }
+        @keyframes pulseAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+        /* 已移除未使用的阶段/条形进度组件样式（仅保留任务卡背景进度条） */
+
+        /* 整个任务格子的进度背景 */
+        .task-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .task-content { position: relative; z-index: 2; }
+        .task-progress-bg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .task-progress-fill { height: 100%; width: 0%; background: var(--task-progress-grad-light); transition: width 400ms ease-in-out; }
+        .task-item.completed .task-progress-fill { background: var(--task-progress-grad-solid); }
+        .task-progress-fill.glow { box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+
+        /* +1 飞出文字 */
+        .plus-fly {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-weight: 800;
+            color: var(--plus-color);
+            transform: translate(-50%, -50%) translateY(0) scale(1);
+            animation: flyUp 420ms ease-out forwards;
+            pointer-events: none;
+            z-index: 3500;
+        }
+
+        /* +1 额外夸张特效：波纹环 */
+        .ring-wave {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            border: 2px solid rgba(69,195,221,0.55);
+            box-shadow: 0 0 0 0 rgba(45,143,179,0.0);
+            transform: translate(-50%, -50%) scale(0.7);
+            opacity: 1;
+            animation: ringWave 420ms cubic-bezier(.2,.9,.2,1) forwards;
+            pointer-events: none;
+            z-index: 3400;
+        }
+        @keyframes ringWave {
+            0% { transform: translate(-50%, -50%) scale(0.7); opacity: 1; box-shadow: 0 0 0 0 rgba(45,143,179,0.0); }
+            60% { opacity: 0.55; }
+            100% { transform: translate(-50%, -50%) scale(7.2); opacity: 0; box-shadow: 0 0 0 10px rgba(45,143,179,0.06); }
+        }
+        @keyframes flyUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+            40% { transform: translate(-50%, -50%) translateY(-18px) scale(1.18); }
+            100% { opacity: 0; transform: translate(-50%, -50%) translateY(-56px) scale(0.9); }
+        }
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 1;
+            transform: translate(0,0) scale(1);
+            animation: particleMove 520ms cubic-bezier(.2,.8,.2,1) forwards;
+            z-index: 3500;
+        }
+        @keyframes particleMove {
+            to { opacity: 0; transform: translate(var(--tx,0px), var(--ty,-30px)) scale(0.6); }
+        }
+
+        /* 纸屑彩带（更浮夸，从点击位置飞出） */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 14px;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 1;
+            transform: translate(-50%, -50%) rotate(0deg);
+            animation: confettiFly 620ms cubic-bezier(.16,.9,.2,1) forwards;
+            z-index: 3600;
+            filter: drop-shadow(0 6px 10px rgba(45,143,179,0.10));
+        }
+        @keyframes confettiFly {
+            0% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) rotate(0deg); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx, 0px), var(--ty, -60px)) rotate(var(--rot, 180deg)); }
+        }
+
+        /* 闪光（点击处出现一下） */
+        .sparkle {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 3650;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 35%, rgba(69,195,221,0.00) 70%),
+                conic-gradient(from 0deg, rgba(69,195,221,0.0) 0%, rgba(69,195,221,0.55) 18%, rgba(69,195,221,0.0) 36%, rgba(45,143,179,0.55) 54%, rgba(45,143,179,0.0) 72%, rgba(69,195,221,0.55) 90%, rgba(69,195,221,0.0) 100%);
+            transform: translate(-50%, -50%) scale(0.65);
+            opacity: 0;
+            animation: sparklePop 320ms cubic-bezier(.2,.9,.25,1) forwards;
+            mix-blend-mode: screen;
+        }
+        @keyframes sparklePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.45) rotate(0deg); }
+            25% { opacity: 0.95; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.55) rotate(80deg); }
+        }
+
+        /* 完成强调动画：更浮夸（发光 + 轻微旋转），但只在完成瞬间触发 */
+        .complete-pop {
+            animation: completePop 520ms cubic-bezier(.2,.9,.25,1);
+            box-shadow:
+                0 20px 60px rgba(45,143,179,0.22),
+                0 0 0 6px rgba(69,195,221,0.10);
+            transform-origin: center;
+        }
+        @keyframes completePop {
+            0% { transform: scale(1) rotate(0deg); filter: saturate(1); }
+            18% { transform: scale(1.10) rotate(-1.2deg); filter: saturate(1.05); }
+            42% { transform: scale(0.985) rotate(1.2deg); }
+            70% { transform: scale(1.03) rotate(-0.6deg); }
+            100% { transform: scale(1) rotate(0deg); filter: saturate(1); }
+        }
+
+        /* 轻微“全屏弹一下”：只在完成瞬间加上，增强成就感 */
+        body.screen-bump { animation: screenBump 320ms cubic-bezier(.2,.9,.25,1); }
+        @keyframes screenBump {
+            0% { transform: translateY(0); }
+            22% { transform: translateY(-2px); }
+            60% { transform: translateY(1px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Modal 样式（替代 inline style） */
+        .modal-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); z-index: 2000; }
+        .modal-overlay.hidden { display: none; }
+        .modal-content { background: var(--modal-bg); color: inherit; padding: 18px; border-radius: 12px; min-width: 320px; max-width: 520px; box-shadow: 0 18px 60px rgba(0,0,0,0.45); border: 1px solid var(--modal-border); backdrop-filter: blur(10px); }
+        .modal-overlay:not(.hidden) .modal-content { animation: modalIn 180ms cubic-bezier(.2,.9,.25,1); }
+        @keyframes modalIn {
+            0% { transform: translateY(6px) scale(0.98); opacity: 0.0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-form { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+        .modal-row { display:flex; gap:8px; align-items:center; }
+        .modal-input { padding:10px; border:1px solid var(--input-border); border-radius:8px; background: var(--input-bg); color: var(--text-primary); }
+        .modal-date { flex:1; }
+        .modal-select { width:110px; padding:8px; border:1px solid var(--input-border); border-radius:8px; background: var(--input-bg); color: var(--text-primary); }
+        .modal-actions { margin-top:12px; display:flex; justify-content:flex-end; gap:8px; }
+
+        .modal-label { font-size: 0.9rem; color: var(--text-secondary); }
+        .modal-hint { font-size: 0.78rem; color: var(--text-secondary); margin-top: -4px; }
+        .modal-range { width: 100%; accent-color: var(--accent); }
+        .modal-checkin { margin-top: 8px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.16); }
+        .mode-light .modal-checkin { border-top-color: rgba(0,0,0,0.12); }
+        .modal-checkin-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+        .modal-checkin-list { margin-top: 8px; display:flex; flex-wrap:wrap; gap:6px; }
+        .checkin-pill { font-size: 0.78rem; padding: 3px 8px; border-radius: 999px; background: rgba(69,195,221,0.18); color: var(--text-primary); border: 1px solid rgba(69,195,221,0.25); }
+
+        .cycle-badge { font-size: 0.78rem; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: var(--text-primary); }
+        .mode-light .cycle-badge { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.10); color: #1f2937; }
+
+        .delay-btn:hover { color: var(--accent); }
+
+        /* Stats modal */
+        .stats-modal { width: min(980px, 92vw); max-width: 980px; }
+        .stats-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+        .stats-grid { margin-top: 10px; display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; }
+        .stats-card { padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
+        .mode-light .stats-card { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+        .stats-card .k { font-size: 0.78rem; color: var(--text-secondary); }
+        .stats-card .v { margin-top: 4px; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
+
+        .stats-row { margin-top: 10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+        .stats-panel { padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); }
+        .mode-light .stats-panel { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+        .stats-panel h4 { margin: 0 0 8px 0; font-size: 0.92rem; color: var(--text-primary); }
+        .barline { display:flex; align-items:center; gap:8px; margin:6px 0; }
+        .barline .label { width: 58px; font-size: 0.78rem; color: var(--text-secondary); }
+        .barline .barwrap { flex:1; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.10); overflow:hidden; }
+        .mode-light .barline .barwrap { background: rgba(0,0,0,0.08); }
+        .barline .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(69,195,221,0.85), rgba(137,211,234,0.95)); }
+        .barline .bar2 { background: linear-gradient(90deg, rgba(255,243,176,0.85), rgba(69,195,221,0.85)); }
+        .barline .num { width: 42px; text-align:right; font-size: 0.78rem; color: var(--text-secondary); }
+
+        .stats-controls { margin-top: 10px; display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+        .stats-controls .left { display:flex; gap:8px; align-items:center; }
+        .stats-controls select { padding:8px; border-radius:10px; border:1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary); }
+
+        /* 下拉框可读性：修复 Windows/Chromium 暗色下 option 继承浅色导致“白底白字/灰字看不清” */
+        html:not(.mode-light) .stats-controls select,
+        html:not(.mode-light) .modal-select {
+            color-scheme: dark;
+        }
+        .mode-light .stats-controls select,
+        .mode-light .modal-select {
+            color-scheme: light;
+        }
+        html:not(.mode-light) .stats-controls select option,
+        html:not(.mode-light) .modal-select option {
+            background: #07141b;
+            color: #eaf6fb;
+        }
+        .mode-light .stats-controls select option,
+        .mode-light .modal-select option {
+            background: #ffffff;
+            color: #0b2233;
+        }
+
+
+        .stats-table-wrap { margin-top: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,0.10); }
+        .mode-light .stats-table-wrap { border-color: rgba(0,0,0,0.10); }
+        .stats-table { width:100%; border-collapse:collapse; font-size: 0.86rem; }
+        .stats-table th, .stats-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align:left; }
+        .mode-light .stats-table th, .mode-light .stats-table td { border-bottom-color: rgba(0,0,0,0.08); }
+        .stats-table th { position: sticky; top: 0; background: var(--modal-bg); z-index: 1; }
+
+        .panel-tabs { margin-bottom: 14px; }
+        #tabStats { max-height: 720px; overflow-y: auto; padding-right: 6px; }
+
+        @media (max-width: 860px) {
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>📅 神秘人生大计</h1>
+                <p class="subtitle">谁把这个网页放我电脑里了？</p>
+            </div>
+            <div class="header-right">
+                <div class="mini-panel">
+                    <div class="stat-item total-count">
+                        <div class="stat-value" id="totalTasks">0</div>
+                        <div class="stat-label">总事项</div>
+                    </div>
+                    <div class="stat-item completed-count">
+                        <div class="stat-value" id="completedTasks">0</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                    <div class="stat-item overdue-count">
+                        <div class="stat-value" id="overdueTasks">0</div>
+                        <div class="stat-label">已逾期</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="exportBtn" class="btn btn-secondary" title="导出 JSON" aria-label="导出 JSON">⤓ 导出</button>
+                    <button id="importBtn" class="btn btn-secondary" title="导入 JSON" aria-label="导入 JSON">⤒ 导入</button>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="modeToggleBtn" class="btn btn-secondary" title="切换暗/亮" aria-label="切换暗/亮">🌙</button>
+                </div>
+                <input type="file" id="importFile" class="hidden" accept=".json">
+            </div>
+        </header>
+
+        <!-- 原顶栏输入已移除，使用右上角“新建事件”按钮打开 modal 新建事项 -->
+
+        <div class="main-content">
+            <!-- 面板已嵌入 header 右侧（更紧凑、更和谐） -->
+            
+            <div class="right-panel">
+                <h2 class="panel-title">🗂️ 待办事项列表</h2>
+
+                <div class="filter-controls panel-tabs">
+                    <button id="tabBtnTasks" class="filter-btn active" type="button" data-tab="tasks">事件</button>
+                    <button id="tabBtnStats" class="filter-btn" type="button" data-tab="stats">统计</button>
+                </div>
+
+                <div id="tabTasks" class="tab-panel">
+
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <div class="filter-controls display-controls">
+                        <button class="filter-btn" data-filter="all">全部事项</button>
+                        <button class="filter-btn active" data-filter="pending">待办事项</button>
+                        <button class="filter-btn" data-filter="completed">已完成事项</button>
+                    </div>
+                    <div>
+                        <button id="openCreateBtn" class="btn btn-secondary">新建事件</button>
+                    </div>
+                </div>
+
+                <div class="filter-controls">
+                    <button class="filter-btn active" data-sort="ddl">按DDL排序</button>
+                    <button class="filter-btn" data-sort="created">按创建时间</button>
+                    <button class="filter-btn" data-sort="title">按标题排序</button>
+                    <button class="filter-btn" data-sort="importance">按重要度排序</button>
+                </div>
+                
+                <div class="task-list" id="taskList">
+                    <!-- 任务列表将动态加载到这里 -->
+                    <div class="empty-state" id="emptyState">
+                        <div style="font-size:3rem; line-height:1; margin-bottom:15px; color:#ccc;">📋</div>
+                        <h3>暂无待办事项</h3>
+                        <p>再睡一小会儿吧~</p>
+                    </div>
+                </div>
+
+                </div>
+
+                <div id="tabStats" class="tab-panel hidden">
+                    <div class="stats-head">
+                        <h3 style="margin:0;">统计</h3>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stats-card"><div class="k">已完成（普通）</div><div class="v" id="statsDoneNormal">0</div></div>
+                        <div class="stats-card"><div class="k">打卡事件（进行中）</div><div class="v" id="statsActiveRecurring">0</div></div>
+                        <div class="stats-card"><div class="k">打卡累计完成率</div><div class="v" id="statsRecurringRate">0%</div></div>
+                        <div class="stats-card"><div class="k">平均逾期（已完成）</div><div class="v" id="statsAvgOverdue">-</div></div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stats-panel">
+                            <h4>已完成事项 · 重要度分布</h4>
+                            <div id="statsImportanceBars"></div>
+                        </div>
+                        <div class="stats-panel">
+                            <h4>类型占比</h4>
+                            <div id="statsTypeBars"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stats-panel" style="grid-column: 1 / -1;">
+                            <h4>神秘统计折线</h4>
+                            <div class="stats-controls" style="margin-top:0;">
+                                <div class="left">
+                                    <span style="font-size:0.78rem;color:var(--text-secondary);">显示天数</span>
+                                    <input id="statsChartDays" type="range" min="7" max="60" step="1" value="30" class="modal-range" style="width:220px;" />
+                                    <span id="statsChartDaysText" style="font-size:0.78rem;color:var(--text-secondary);">30 天</span>
+                                </div>
+                                <div style="font-size:0.78rem;color:var(--text-secondary);">勤奋值 = 近7天按时率×9 + 近7天重要度和×5 + 近7天打卡×2 − 近7天逾期天数和×3</div>
+                            </div>
+                            <div id="statsDiligenceChart" style="margin-top:8px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-controls">
+                        <div class="left">
+                            <select id="statsScope">
+                                <option value="donePlusRecurring" selected>已完成 + 打卡</option>
+                                <option value="done">仅已完成事件</option>
+                                <option value="recurring">仅打卡事件</option>
+                                <option value="all">全部</option>
+                            </select>
+                            <select id="statsSort">
+                                <option value="importanceDesc" selected>按重要度（高→低）</option>
+                                <option value="completedDesc">按完成时间（新→旧）</option>
+                                <option value="overdueDesc">按逾期天数（高→低）</option>
+                                <option value="metricDesc">按完成指标（高→低）</option>
+                                <option value="titleAsc">按标题（A→Z）</option>
+                            </select>
+                            <span style="font-size:0.78rem;color:var(--text-secondary);">预计结束：过去</span>
+                            <input id="statsDueRange" type="range" min="0" max="51" step="1" value="51" class="modal-range" style="width:180px;" />
+                            <span id="statsDueRangeText" style="font-size:0.78rem;color:var(--text-secondary);">不限</span>
+                        </div>
+                        <div id="statsNote" style="font-size:0.78rem;color:var(--text-secondary);"></div>
+                    </div>
+
+                    <div class="stats-table-wrap">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:70px;">类型</th>
+                                    <th style="width:60px;">重要度</th>
+                                    <th>标题</th>
+                                    <th style="width:110px;">完成指标</th>
+                                    <th style="width:110px;">预计结束</th>
+                                    <th style="width:110px;">完成时间</th>
+                                    <th style="width:90px;">逾期天数</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statsTbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>数据已自动保存到本地浏览器存储中 | 使用提示：点击事项右侧的“+1”推进进度，进度满自动标记为完成</p>
+        </footer>
+    </div>
+
+    <!-- Modal: new/edit task -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modalTitleText">新建事项</h3>
+            <div class="modal-form">
+                <input id="modalTaskTitle" class="modal-input" placeholder="事项标题" />
+                <input id="modalTaskDesc" class="modal-input" placeholder="事项描述（可选）" />
+                <div class="modal-row">
+                    <input id="modalTaskDdl" type="date" class="modal-input modal-date" />
+                    <select id="modalTaskImportance" title="重要度" class="modal-select">
+                        <option value="1">重要度 1</option>
+                        <option value="2">重要度 2</option>
+                        <option value="3" selected>重要度 3</option>
+                        <option value="4">重要度 4</option>
+                        <option value="5">重要度 5</option>
+                    </select>
+                </div>
+
+                <div class="modal-label">循环周期：<span id="modalTaskCycleText">无穷大（不循环）</span></div>
+                <input id="modalTaskCycle" type="range" min="0" max="7" step="1" value="0" class="modal-range" />
+                <div class="modal-hint">0 = 无穷大（不循环）；1~7 表示每 N 天循环一次</div>
+
+                <div class="modal-row">
+                    <input id="modalTaskCycleEnd" type="date" class="modal-input modal-date" />
+                </div>
+                <div class="modal-hint">周期结束时间（可选，留空 = 无穷天）</div>
+
+                <div id="modalCheckinSection" class="modal-checkin hidden">
+                    <div class="modal-checkin-head">
+                        <div class="modal-label">打卡情况：<span id="modalCheckinText">0/0</span></div>
+                    </div>
+                    <div class="modal-row">
+                        <input id="modalCheckinDate" type="date" class="modal-input modal-date" />
+                        <button id="modalCheckinAddBtn" class="btn btn-secondary" type="button">补打卡</button>
+                        <button id="modalCheckinRemoveBtn" class="btn btn-secondary" type="button">撤销</button>
+                    </div>
+                    <div id="modalCheckinList" class="modal-checkin-list"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="modalCancelBtn" class="btn btn-secondary">取消</button>
+                <button id="modalSaveBtn" class="btn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用状态和DOM元素
+        const state = {
+            tasks: [],
+            // 默认打开显示“待办/待完成”
+            filter: 'pending',
+            sortBy: 'ddl'
+        };
+
+        // 全局可配置：最大进度步数（从0到MAX_PROGRESS）。修改此值即可改变完成所需点击次数。
+        const MAX_PROGRESS = 6;
+
+        // DOM元素（已移除顶栏的原生输入，使用 modal 创建/编辑）
+        const DOM = {
+            openCreateBtn: document.getElementById('openCreateBtn'),
+            tabBtnTasks: document.getElementById('tabBtnTasks'),
+            tabBtnStats: document.getElementById('tabBtnStats'),
+            tabBtns: document.querySelectorAll('.filter-btn[data-tab]'),
+            tabTasks: document.getElementById('tabTasks'),
+            tabStats: document.getElementById('tabStats'),
+            modalOverlay: document.getElementById('modalOverlay'),
+            modalTaskTitle: document.getElementById('modalTaskTitle'),
+            modalTaskDesc: document.getElementById('modalTaskDesc'),
+            modalTaskDdl: document.getElementById('modalTaskDdl'),
+            modalTaskImportance: document.getElementById('modalTaskImportance'),
+            modalTaskCycle: document.getElementById('modalTaskCycle'),
+            modalTaskCycleText: document.getElementById('modalTaskCycleText'),
+            modalTaskCycleEnd: document.getElementById('modalTaskCycleEnd'),
+            modalCheckinSection: document.getElementById('modalCheckinSection'),
+            modalCheckinText: document.getElementById('modalCheckinText'),
+            modalCheckinDate: document.getElementById('modalCheckinDate'),
+            modalCheckinAddBtn: document.getElementById('modalCheckinAddBtn'),
+            modalCheckinRemoveBtn: document.getElementById('modalCheckinRemoveBtn'),
+            modalCheckinList: document.getElementById('modalCheckinList'),
+            modalSaveBtn: document.getElementById('modalSaveBtn'),
+            modalCancelBtn: document.getElementById('modalCancelBtn'),
+            taskList: document.getElementById('taskList'),
+            emptyState: document.getElementById('emptyState'),
+            filterBtns: document.querySelectorAll('.filter-btn[data-filter]'),
+            sortBtns: document.querySelectorAll('.filter-btn[data-sort]'),
+            statsScope: document.getElementById('statsScope'),
+            statsSort: document.getElementById('statsSort'),
+            statsDueRange: document.getElementById('statsDueRange'),
+            statsDueRangeText: document.getElementById('statsDueRangeText'),
+            statsChartDays: document.getElementById('statsChartDays'),
+            statsChartDaysText: document.getElementById('statsChartDaysText'),
+            statsDiligenceChart: document.getElementById('statsDiligenceChart'),
+            statsDoneNormal: document.getElementById('statsDoneNormal'),
+            statsActiveRecurring: document.getElementById('statsActiveRecurring'),
+            statsRecurringRate: document.getElementById('statsRecurringRate'),
+            statsAvgOverdue: document.getElementById('statsAvgOverdue'),
+            statsImportanceBars: document.getElementById('statsImportanceBars'),
+            statsTypeBars: document.getElementById('statsTypeBars'),
+            statsTbody: document.getElementById('statsTbody'),
+            statsNote: document.getElementById('statsNote'),
+            exportBtn: document.getElementById('exportBtn'),
+            importBtn: document.getElementById('importBtn'),
+            modeToggleBtn: document.getElementById('modeToggleBtn'),
+            importFile: document.getElementById('importFile'),
+            totalTasks: document.getElementById('totalTasks'),
+            completedTasks: document.getElementById('completedTasks'),
+            overdueTasks: document.getElementById('overdueTasks')
+        };
+
+        // 固定文案（已移除主题文案系统）
+        const TEXTS = {
+            modalCreateTitle: '新建事项',
+            modalEditTitle: '编辑事项',
+            noDdl: '无截止日期',
+            ddlToday: '今天截止',
+            ddlTomorrow: '明天截止',
+            ddlOverdue: (n) => `已逾期 ${n} 天`,
+            ddlInDays: (n) => `${n} 天后截止`,
+            createdPrefix: '创建于'
+        };
+
+        // 本地音效（不加载任何外部文件）：使用 Web Audio API 动态合成
+        const SFX = (() => {
+            let audioCtx = null;
+            let enabled = true;
+
+            function getCtx() {
+                if (!enabled) return null;
+                if (!audioCtx) {
+                    const Ctx = window.AudioContext || window.webkitAudioContext;
+                    if (!Ctx) return null;
+                    audioCtx = new Ctx();
+                }
+                return audioCtx;
+            }
+
+            async function unlock() {
+                const ctx = getCtx();
+                if (!ctx) return;
+                if (ctx.state === 'suspended') {
+                    try { await ctx.resume(); } catch (e) {}
+                }
+            }
+
+            function tone({
+                type = 'sine',
+                f0 = 520,
+                f1 = null,
+                dur = 0.06,
+                gain = 0.045,
+                attack = 0.002,
+                release = 0.05,
+                filter = null
+            } = {}) {
+                const ctx = getCtx();
+                if (!ctx) return;
+                const t = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(f0, t);
+                if (typeof f1 === 'number') {
+                    osc.frequency.exponentialRampToValueAtTime(Math.max(40, f1), t + Math.max(0.001, dur));
+                }
+
+                let lastNode = osc;
+                if (filter && filter.type) {
+                    const f = ctx.createBiquadFilter();
+                    f.type = filter.type;
+                    if (typeof filter.freq === 'number') f.frequency.setValueAtTime(filter.freq, t);
+                    if (typeof filter.q === 'number') f.Q.setValueAtTime(filter.q, t);
+                    lastNode.connect(f);
+                    lastNode = f;
+                }
+
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + Math.max(0.001, attack));
+                g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(0.002, dur + release));
+
+                lastNode.connect(g);
+                g.connect(ctx.destination);
+                osc.start(t);
+                osc.stop(t + dur + release + 0.02);
+            }
+
+            // 机械音色：方波 + 带通滤波（更像“电子滴答”）
+            function mech({ f0, f1, dur, gain }) {
+                tone({
+                    type: 'square',
+                    f0,
+                    f1,
+                    dur,
+                    gain,
+                    release: Math.max(0.02, dur * 0.8),
+                    filter: { type: 'bandpass', freq: 1100, q: 6 }
+                });
+            }
+
+            function click() {
+                // 普通点击：机械但温和
+                mech({ f0: 520, f1: 680, dur: 0.030, gain: 0.020 });
+            }
+
+            function softClick() {
+                // 更轻：更短更低
+                mech({ f0: 360, f1: 420, dur: 0.022, gain: 0.016 });
+            }
+
+            function plus1() {
+                // +1：与其它点击区分（更高、更“滴”）
+                mech({ f0: 860, f1: 1180, dur: 0.028, gain: 0.022 });
+            }
+
+            function success() {
+                // 成功：两段上扬
+                mech({ f0: 520, f1: 820, dur: 0.050, gain: 0.020 });
+                setTimeout(() => mech({ f0: 740, f1: 1180, dur: 0.060, gain: 0.022 }), 45);
+            }
+
+            function error() {
+                // 错误：短促下落
+                mech({ f0: 260, f1: 150, dur: 0.055, gain: 0.020 });
+            }
+
+            function danger() {
+                // 删除/危险：更低一点的“咚”
+                tone({ type: 'square', f0: 170, f1: 120, dur: 0.060, gain: 0.020, release: 0.09, filter: { type: 'lowpass', freq: 520, q: 0.8 } });
+            }
+
+            return {
+                unlock,
+                click,
+                softClick,
+                plus1,
+                success,
+                error,
+                danger,
+                setEnabled(v) { enabled = !!v; }
+            };
+        })();
+
+        // 初始化应用
+        function init() {
+            // 默认暗色主题（dark）
+            const savedMode = localStorage.getItem('scheduleMode') || 'dark';
+            applyMode(savedMode);
+
+            // 从本地存储加载数据
+            loadTasks();
+            
+            // 设置 modal 默认DDL为明天
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            if (DOM.modalTaskDdl) DOM.modalTaskDdl.valueAsDate = tomorrow;
+
+            // 事件监听器
+
+            // 主面板 Tab 切换（待办/统计）
+            if (DOM.tabBtns && DOM.tabBtns.length) {
+                DOM.tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        SFX.unlock();
+                        SFX.softClick();
+                        showMainTab(btn.dataset.tab || 'tasks');
+                    });
+                });
+            }
+
+            // modal open/create button
+            if (DOM.openCreateBtn) DOM.openCreateBtn.addEventListener('click', (e) => { SFX.unlock(); SFX.click(); openModal('create'); });
+
+            // modal buttons
+            if (DOM.modalCancelBtn) DOM.modalCancelBtn.addEventListener('click', () => { SFX.unlock(); SFX.softClick(); closeModal(); });
+            if (DOM.modalOverlay) DOM.modalOverlay.addEventListener('click', (e) => { if (e.target === DOM.modalOverlay) { SFX.unlock(); SFX.softClick(); closeModal(); } });
+            if (DOM.modalSaveBtn) DOM.modalSaveBtn.addEventListener('click', () => { SFX.unlock(); SFX.click(); handleModalSave(); });
+
+            // 循环周期滑块
+            if (DOM.modalTaskCycle) {
+                DOM.modalTaskCycle.addEventListener('input', () => {
+                    updateCycleUI();
+                });
+            }
+
+            // 补打卡（仅编辑周期任务时显示）
+            if (DOM.modalCheckinAddBtn) {
+                DOM.modalCheckinAddBtn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.click();
+                    handleModalCheckinAdd();
+                });
+            }
+            if (DOM.modalCheckinRemoveBtn) {
+                DOM.modalCheckinRemoveBtn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.softClick();
+                    handleModalCheckinRemove();
+                });
+            }
+            
+            // 筛选按钮事件
+            DOM.filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.softClick();
+                    DOM.filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.filter = btn.dataset.filter;
+                    renderTasks();
+                });
+            });
+
+            // 初始筛选按钮高亮与默认 filter 保持一致
+            DOM.filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
+            
+            // 排序按钮事件
+            DOM.sortBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.softClick();
+                    DOM.sortBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.sortBy = btn.dataset.sort;
+                    renderTasks();
+                });
+            });
+            
+            // 导出/导入事件
+            DOM.exportBtn.addEventListener('click', () => { SFX.unlock(); SFX.click(); exportTasks(); });
+            DOM.importBtn.addEventListener('click', () => { SFX.unlock(); SFX.click(); DOM.importFile.click(); });
+            DOM.importFile.addEventListener('change', importTasks);
+
+            if (DOM.statsScope) DOM.statsScope.addEventListener('change', () => { SFX.unlock(); SFX.softClick(); renderStats(); });
+            if (DOM.statsSort) DOM.statsSort.addEventListener('change', () => { SFX.unlock(); SFX.softClick(); renderStats(); });
+            if (DOM.statsDueRange) DOM.statsDueRange.addEventListener('input', () => { SFX.unlock(); SFX.softClick(); renderStats(); });
+            if (DOM.statsChartDays) DOM.statsChartDays.addEventListener('input', () => { renderStats(); });
+
+            // 暗/亮切换
+            if (DOM.modeToggleBtn) {
+                DOM.modeToggleBtn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.click();
+                    const root = document.documentElement;
+                    const isLight = root.classList.contains('mode-light');
+                    applyMode(isLight ? 'dark' : 'light');
+                });
+            }
+            
+            // 确保 modal 初始化为关闭状态（防止意外弹出）
+            closeModal();
+
+            // 默认显示待办 Tab
+            showMainTab('tasks');
+
+            // 初始渲染
+            renderTasks();
+        }
+
+        function showMainTab(tab) {
+            const key = tab === 'stats' ? 'stats' : 'tasks';
+            if (DOM.tabTasks) DOM.tabTasks.classList.toggle('hidden', key !== 'tasks');
+            if (DOM.tabStats) DOM.tabStats.classList.toggle('hidden', key !== 'stats');
+            if (DOM.tabBtns && DOM.tabBtns.length) {
+                DOM.tabBtns.forEach(btn => btn.classList.toggle('active', (btn.dataset.tab || 'tasks') === key));
+            }
+            if (key === 'stats') renderStats();
+        }
+
+        function applyMode(mode) {
+            const root = document.documentElement;
+            const next = (mode === 'light') ? 'light' : 'dark';
+            root.classList.toggle('mode-light', next === 'light');
+            localStorage.setItem('scheduleMode', next);
+            updateModeButton(next);
+        }
+
+        function updateModeButton(mode) {
+            if (!DOM.modeToggleBtn) return;
+            if (mode === 'light') {
+                DOM.modeToggleBtn.title = '切换到暗色';
+                DOM.modeToggleBtn.textContent = '☀️';
+            } else {
+                DOM.modeToggleBtn.title = '切换到亮色';
+                DOM.modeToggleBtn.textContent = '🌙';
+            }
+        }
+
+        function clamp(n, min, max) {
+            return Math.max(min, Math.min(max, n));
+        }
+
+        // 由 clientX/clientY 计算在 container 内的点击坐标（相对容器左上角）
+        function getClickOrigin(containerEl, clientX, clientY) {
+            if (!containerEl) return null;
+            const rect = containerEl.getBoundingClientRect();
+            const x = clamp(clientX - rect.left, 0, rect.width);
+            const y = clamp(clientY - rect.top, 0, rect.height);
+            return { x, y };
+        }
+
+        // 产生粒子爆炸效果（从 origin 处释放）
+        function spawnParticles(container, color, count = 14, sizeBoost = 0, origin = null) {
+            if (!container) return;
+            const baseColor = (color || getComputedStyle(document.documentElement).getPropertyValue('--plus-color') || '#45c3dd').trim();
+            const baseX = origin && typeof origin.x === 'number' ? origin.x : (container.clientWidth - 22);
+            const baseY = origin && typeof origin.y === 'number' ? origin.y : (container.clientHeight - 22);
+
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.background = baseColor;
+
+                const size = (6 + Math.round(Math.random() * 12)) + (sizeBoost ? Math.round(Math.random() * 10) : 0);
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+
+                // 小抖动，让爆炸更自然
+                const jitter = sizeBoost ? 10 : 6;
+                p.style.left = (baseX + (Math.random() * jitter * 2 - jitter)) + 'px';
+                p.style.top = (baseY + (Math.random() * jitter * 2 - jitter)) + 'px';
+
+                // 随机方向与距离
+                const angle = Math.random() * Math.PI * 2;
+                const dist = (12 + Math.random() * 56) + (sizeBoost ? 26 : 0);
+                const tx = Math.round(Math.cos(angle) * dist) + 'px';
+                const ty = Math.round(Math.sin(angle) * dist) + 'px';
+                p.style.setProperty('--tx', tx);
+                p.style.setProperty('--ty', ty);
+
+                container.appendChild(p);
+                setTimeout(() => { try { container.removeChild(p); } catch(e){} }, 720);
+            }
+        }
+
+        // 纸屑彩带（更浮夸）
+        function spawnConfetti(container, origin, count = 24, big = false) {
+            if (!container || !origin) return;
+            const colors = ['#ffffff', 'rgba(137,211,234,0.95)', 'rgba(69,195,221,0.95)', 'rgba(45,143,179,0.95)', 'rgba(255,243,176,0.85)'];
+            for (let i = 0; i < count; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = origin.x + 'px';
+                c.style.top = origin.y + 'px';
+
+                const w = 6 + Math.random() * (big ? 10 : 6);
+                const h = 10 + Math.random() * (big ? 16 : 10);
+                c.style.width = Math.round(w) + 'px';
+                c.style.height = Math.round(h) + 'px';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = (18 + Math.random() * (big ? 140 : 70));
+                const tx = Math.round(Math.cos(angle) * dist);
+                const ty = Math.round(Math.sin(angle) * dist - (big ? 90 : 55));
+                const rot = Math.round((Math.random() * 720 - 360)) + 'deg';
+                c.style.setProperty('--tx', tx + 'px');
+                c.style.setProperty('--ty', ty + 'px');
+                c.style.setProperty('--rot', rot);
+
+                container.appendChild(c);
+                setTimeout(() => { try { container.removeChild(c); } catch(e){} }, 820);
+            }
+        }
+
+        // 点击处闪光
+        function spawnSparkle(container, origin, big = false) {
+            if (!container || !origin) return null;
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            s.style.left = origin.x + 'px';
+            s.style.top = origin.y + 'px';
+            if (big) {
+                s.style.width = '38px';
+                s.style.height = '38px';
+            }
+            container.appendChild(s);
+            setTimeout(() => { try { container.removeChild(s); } catch(e){} }, 420);
+            return s;
+        }
+
+        // 从本地存储加载任务
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('scheduleTasks');
+            if (savedTasks) {
+                try {
+                    state.tasks = JSON.parse(savedTasks);
+                    
+                    // 确保每个任务都有id和progress
+                    state.tasks.forEach(task => {
+                        if (!task.id) task.id = Date.now() + Math.random();
+                        if (!task.createdAt) task.createdAt = new Date().toISOString();
+                            if (typeof task.progress !== 'number') {
+                                // 兼容老数据：以前用completed标记，转换为progress
+                                task.progress = task.completed ? MAX_PROGRESS : 0;
+                            }
+                            // 兼容老数据：重要度默认值
+                            if (typeof task.importance !== 'number') {
+                                task.importance = 3; // 1-5，默认中等
+                            }
+
+                            // 完成时间（用于统计）
+                            if (typeof task.completedAt !== 'string') task.completedAt = null;
+                            // 兼容老数据：以前已完成但没有 completedAt，补一个可用的时间用于统计/排序
+                            // 规则：优先用 DDL 的日期（视为按时完成），否则用创建日期
+                            if (task.completed && !task.completedAt) {
+                                const ddlKey = task.ddl ? String(task.ddl).slice(0, 10) : '';
+                                const createdKey = task.createdAt ? String(task.createdAt).slice(0, 10) : '';
+                                const key = ddlKey || createdKey;
+                                if (key) task.completedAt = `${key}T00:00:00`;
+                            }
+
+                            // 循环任务字段兼容
+                            if (typeof task.cycleDays !== 'number') task.cycleDays = null; // null/0 视为不循环
+                            if (task.cycleDays === 0) task.cycleDays = null;
+                            if (typeof task.cycleEnd !== 'string') task.cycleEnd = null; // YYYY-MM-DD or null
+                            if (!Array.isArray(task.checkins)) task.checkins = [];
+                            // 延时字段：snoozeFor 是某次“应打卡日期”，snoozeUntil 是展示的延时截止日期
+                            if (typeof task.snoozeFor !== 'string') task.snoozeFor = null;
+                            if (typeof task.snoozeUntil !== 'string') task.snoozeUntil = null;
+                    });
+                } catch (e) {
+                    console.error('加载任务数据失败:', e);
+                    state.tasks = [];
+                }
+            }
+        }
+
+        // 将只含日期的字符串（YYYY-MM-DD）解析为本地时区的 Date（本地午夜）
+        function parseDateOnly(dateStr) {
+            if (!dateStr) return null;
+            // 保证处理类似 'YYYY-MM-DD' 或包含时间的 ISO 字符串
+            const s = String(dateStr).slice(0, 10);
+            const parts = s.split('-');
+            if (parts.length !== 3) return new Date(dateStr);
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            return new Date(y, m, d);
+        }
+
+        const MS_PER_DAY = 1000 * 3600 * 24;
+
+        function getToday0() {
+            const t = new Date();
+            t.setHours(0, 0, 0, 0);
+            return t;
+        }
+
+        function toDateKey(d) {
+            if (!d) return null;
+            const date = (d instanceof Date) ? d : parseDateOnly(d);
+            if (!date) return null;
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        }
+
+        function addDaysToKey(dateKey, days) {
+            const d = parseDateOnly(dateKey);
+            if (!d) return null;
+            d.setDate(d.getDate() + (days || 0));
+            return toDateKey(d);
+        }
+
+        function uniqueSortedDateKeys(keys) {
+            const arr = (Array.isArray(keys) ? keys : [])
+                .map(k => String(k).slice(0, 10))
+                .filter(Boolean);
+            return Array.from(new Set(arr)).sort();
+        }
+
+        function isRecurringTask(task) {
+            return task && Number.isFinite(task.cycleDays) && task.cycleDays > 0;
+        }
+
+        function getCycleEndDate(task) {
+            const endKey = task && typeof task.cycleEnd === 'string' ? task.cycleEnd : null;
+            return endKey ? parseDateOnly(endKey) : null;
+        }
+
+        function ensureTaskCheckins(task) {
+            if (!task) return;
+            task.checkins = uniqueSortedDateKeys(task.checkins);
+        }
+
+        function isDateAlignedToCycle(task, dateKey) {
+            if (!isRecurringTask(task)) return true;
+            const first = parseDateOnly(task.ddl);
+            const d = parseDateOnly(dateKey);
+            if (!first || !d) return false;
+            const diffDays = Math.round((d.getTime() - first.getTime()) / MS_PER_DAY);
+            if (diffDays < 0) return false;
+            return diffDays % task.cycleDays === 0;
+        }
+
+        function getRecurringExpectedCount(task, untilDate) {
+            if (!isRecurringTask(task) || !task.ddl) return 0;
+            const first = parseDateOnly(task.ddl);
+            if (!first) return 0;
+
+            const until = (untilDate instanceof Date) ? untilDate : parseDateOnly(untilDate);
+            if (!until) return 0;
+
+            const end = getCycleEndDate(task);
+            const cap = end && until > end ? end : until;
+            if (cap < first) return 0;
+
+            const diffDays = Math.floor((cap.getTime() - first.getTime()) / MS_PER_DAY);
+            return Math.floor(diffDays / task.cycleDays) + 1;
+        }
+
+        function getRecurringDoneCount(task, untilDate) {
+            if (!isRecurringTask(task) || !task.ddl) return 0;
+            ensureTaskCheckins(task);
+            const first = parseDateOnly(task.ddl);
+            const until = (untilDate instanceof Date) ? untilDate : parseDateOnly(untilDate);
+            if (!first || !until) return 0;
+
+            const end = getCycleEndDate(task);
+            const cap = end && until > end ? end : until;
+            const capKey = toDateKey(cap);
+            const firstKey = toDateKey(first);
+
+            return task.checkins.filter(k => {
+                if (k < firstKey) return false;
+                if (capKey && k > capKey) return false;
+                return isDateAlignedToCycle(task, k);
+            }).length;
+        }
+
+        // 返回“下一次应完成（最早未打卡）”的【计划日期 key】（不含延时展示）
+        function getRecurringNextScheduledKey(task) {
+            if (!isRecurringTask(task) || !task.ddl) return null;
+            ensureTaskCheckins(task);
+
+            const first = parseDateOnly(task.ddl);
+            if (!first) return null;
+
+            const today = getToday0();
+            const end = getCycleEndDate(task);
+
+            // 在 [first, min(today,end)] 范围内先找“漏打卡”的最早一次
+            const max = end && today > end ? end : today;
+            const maxDiffDays = Math.floor((max.getTime() - first.getTime()) / MS_PER_DAY);
+            const maxIndex = maxDiffDays >= 0 ? Math.floor(maxDiffDays / task.cycleDays) : -1;
+
+            const checkSet = new Set(task.checkins);
+            for (let i = 0; i <= maxIndex; i++) {
+                const due = new Date(first.getTime() + i * task.cycleDays * MS_PER_DAY);
+                const key = toDateKey(due);
+                if (!checkSet.has(key)) return key;
+            }
+
+            // 没有漏打卡：找下一次（可能在未来）
+            if (end && today > end) return null;
+            const todayDiffDays = Math.floor((today.getTime() - first.getTime()) / MS_PER_DAY);
+            const nextIndex = todayDiffDays < 0 ? 0 : (Math.floor(todayDiffDays / task.cycleDays) + 1);
+            const nextDue = new Date(first.getTime() + nextIndex * task.cycleDays * MS_PER_DAY);
+            if (end && nextDue > end) return null;
+            return toDateKey(nextDue);
+        }
+
+        function getTaskEffectiveDueKey(task) {
+            if (!task) return null;
+            if (!isRecurringTask(task)) return task.ddl || null;
+
+            const scheduledKey = getRecurringNextScheduledKey(task);
+            if (!scheduledKey) return null;
+
+            // 延时：仅对当前 scheduledKey 生效
+            if (task.snoozeFor === scheduledKey && task.snoozeUntil) {
+                const untilKey = String(task.snoozeUntil).slice(0, 10);
+                if (untilKey > scheduledKey) return untilKey;
+            }
+
+            return scheduledKey;
+        }
+
+        function isTaskCompletedComputed(task) {
+            if (!task) return false;
+            if (!isRecurringTask(task)) return !!task.completed;
+
+            const end = getCycleEndDate(task);
+            if (!end) return false; // 无穷周期永远不“完成”
+
+            const today = getToday0();
+            if (today <= end) return false; // 结束日未过，不算完成
+
+            // 结束日已过：若没有任何漏打卡，则视为完成
+            const next = getRecurringNextScheduledKey(task);
+            return next === null;
+        }
+
+        function getTaskProgressPercent(task) {
+            if (!task) return 0;
+            if (!isRecurringTask(task)) {
+                return Math.round((((task.progress || 0) / MAX_PROGRESS)) * 100);
+            }
+            const today = getToday0();
+            const expected = getRecurringExpectedCount(task, today);
+            const done = getRecurringDoneCount(task, today);
+            if (expected <= 0) return 0;
+            return Math.max(0, Math.min(100, Math.round((done / expected) * 100)));
+        }
+
+        function getEditingTask() {
+            const mode = DOM.modalOverlay.dataset.mode || 'create';
+            const id = DOM.modalOverlay.dataset.editId;
+            if (mode !== 'edit' || !id) return null;
+            return state.tasks.find(t => t.id == id) || null;
+        }
+
+        function updateCycleUI() {
+            const v = DOM.modalTaskCycle ? parseInt(DOM.modalTaskCycle.value, 10) : 0;
+            const cycleDays = Number.isFinite(v) ? v : 0;
+            if (DOM.modalTaskCycleText) {
+                DOM.modalTaskCycleText.textContent = cycleDays <= 0 ? '无穷大（不循环）' : `${cycleDays} 天/次`;
+            }
+            if (DOM.modalTaskCycleEnd) {
+                DOM.modalTaskCycleEnd.disabled = cycleDays <= 0;
+                DOM.modalTaskCycleEnd.style.opacity = cycleDays <= 0 ? '0.6' : '1';
+            }
+            // 编辑模式下：仅周期任务显示补打卡
+            const task = getEditingTask();
+            const showCheckin = !!task && cycleDays > 0;
+            if (DOM.modalCheckinSection) DOM.modalCheckinSection.classList.toggle('hidden', !showCheckin);
+            if (showCheckin && task) refreshModalCheckinUI(task);
+        }
+
+        function refreshModalCheckinUI(task) {
+            if (!task || !DOM.modalCheckinText || !DOM.modalCheckinList) return;
+            ensureTaskCheckins(task);
+            const today = getToday0();
+            const expected = getRecurringExpectedCount(task, today);
+            const done = getRecurringDoneCount(task, today);
+            DOM.modalCheckinText.textContent = `${done}/${expected}`;
+
+            // 展示最近若干次打卡
+            const list = task.checkins.slice(-18);
+            DOM.modalCheckinList.innerHTML = list.map(k => `<span class="checkin-pill">${k}</span>`).join('');
+        }
+
+        function resolveCheckinKeyFromInput(task, inputKey) {
+            const key = String(inputKey || '').slice(0, 10);
+            if (!key) return null;
+            if (!isRecurringTask(task)) return key;
+
+            // 允许补“延时后的日期”：映射到 snoozeFor
+            if (task.snoozeUntil && task.snoozeFor && String(task.snoozeUntil).slice(0, 10) === key) {
+                return task.snoozeFor;
+            }
+            if (!isDateAlignedToCycle(task, key)) return null;
+            const end = getCycleEndDate(task);
+            const d = parseDateOnly(key);
+            if (!d) return null;
+            if (end && d > end) return null;
+            if (parseDateOnly(task.ddl) && d < parseDateOnly(task.ddl)) return null;
+            return key;
+        }
+
+        function handleModalCheckinAdd() {
+            const task = getEditingTask();
+            if (!task || !isRecurringTask(task)) return;
+            const inputKey = DOM.modalCheckinDate ? DOM.modalCheckinDate.value : '';
+            const key = resolveCheckinKeyFromInput(task, inputKey);
+            if (!key) { SFX.unlock(); SFX.error(); alert('补打卡日期需符合循环周期，并且不早于首次DDL/不晚于周期结束。'); return; }
+            ensureTaskCheckins(task);
+            if (!task.checkins.includes(key)) task.checkins.push(key);
+            task.checkins = uniqueSortedDateKeys(task.checkins);
+            // 若补到的是当前应完成的一次，则清除延时
+            if (task.snoozeFor === key) { task.snoozeFor = null; task.snoozeUntil = null; }
+            saveTasks();
+            refreshModalCheckinUI(task);
+            renderTasks();
+            SFX.unlock();
+            SFX.success();
+        }
+
+        function handleModalCheckinRemove() {
+            const task = getEditingTask();
+            if (!task || !isRecurringTask(task)) return;
+            const inputKey = DOM.modalCheckinDate ? DOM.modalCheckinDate.value : '';
+            const key = resolveCheckinKeyFromInput(task, inputKey);
+            if (!key) { SFX.unlock(); SFX.error(); alert('请选择一个有效的周期打卡日期再撤销。'); return; }
+            ensureTaskCheckins(task);
+            task.checkins = task.checkins.filter(k => k !== key);
+            saveTasks();
+            refreshModalCheckinUI(task);
+            renderTasks();
+            SFX.unlock();
+            SFX.softClick();
+        }
+
+        // 保存任务到本地存储
+        function saveTasks() {
+            localStorage.setItem('scheduleTasks', JSON.stringify(state.tasks));
+            updateStats();
+            if (DOM.tabStats && !DOM.tabStats.classList.contains('hidden')) renderStats(true);
+        }
+
+        function calcOverdueDays(ddlKey, completedKey) {
+            const ddl = parseDateOnly(ddlKey);
+            const done = parseDateOnly(completedKey);
+            if (!ddl || !done) return null;
+            const diff = Math.floor((done.getTime() - ddl.getTime()) / MS_PER_DAY);
+            return diff > 0 ? diff : 0;
+        }
+
+        function daysBetweenKeys(aKey, bKey) {
+            const a = parseDateOnly(aKey);
+            const b = parseDateOnly(bKey);
+            if (!a || !b) return null;
+            return Math.floor((b.getTime() - a.getTime()) / MS_PER_DAY);
+        }
+
+        function makeLineChartSvg({ values, labels, width = 920, height = 220, padding = 24 }) {
+            const w = width;
+            const h = height;
+            const p = padding;
+            const innerW = w - p * 2;
+            const innerH = h - p * 2;
+            const n = values.length;
+            const minV = Math.min(...values);
+            const maxV = Math.max(...values);
+            const span = Math.max(1, maxV - minV);
+
+            const pts = values.map((v, i) => {
+                const x = p + (n === 1 ? innerW / 2 : (innerW * i) / (n - 1));
+                const y = p + innerH - ((v - minV) / span) * innerH;
+                return { x, y };
+            });
+            const poly = pts.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ');
+
+            // x 轴标签：最多 6 个
+            const tickCount = Math.min(6, n);
+            const ticks = [];
+            for (let i = 0; i < tickCount; i++) {
+                const idx = Math.round((i * (n - 1)) / Math.max(1, tickCount - 1));
+                const x = pts[idx].x;
+                const lab = labels[idx];
+                ticks.push(`<text x="${x}" y="${h - 6}" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="10">${lab}</text>`);
+            }
+
+            return `
+            <svg width="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="display:block;">
+                <defs>
+                    <linearGradient id="dlLine" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="rgba(69,195,221,0.95)"/>
+                        <stop offset="100%" stop-color="rgba(137,211,234,0.95)"/>
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="${w}" height="${h}" rx="14" ry="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" />
+                <line x1="${p}" y1="${h - p}" x2="${w - p}" y2="${h - p}" stroke="rgba(255,255,255,0.10)" />
+                <line x1="${p}" y1="${p}" x2="${p}" y2="${h - p}" stroke="rgba(255,255,255,0.10)" />
+
+                <polyline fill="none" stroke="url(#dlLine)" stroke-width="3" points="${poly}" />
+                ${pts.map((pt) => `<circle cx="${pt.x}" cy="${pt.y}" r="3" fill="rgba(255,255,255,0.75)" stroke="rgba(69,195,221,0.8)" stroke-width="2" />`).join('')}
+                ${ticks.join('')}
+            </svg>`;
+        }
+
+        function getNormalMetric(task) {
+            const pct = Math.round((((task.progress || 0) / MAX_PROGRESS)) * 100);
+            return { pct, label: `${pct}%` };
+        }
+
+        function getRecurringMetric(task) {
+            const today = getToday0();
+            const expected = getRecurringExpectedCount(task, today);
+            const done = getRecurringDoneCount(task, today);
+            const pct = expected > 0 ? Math.round((done / expected) * 100) : 0;
+            return { pct, label: `${done}/${expected}` };
+        }
+
+        function buildStatsRows(scope) {
+            const todayKey = toDateKey(getToday0());
+            const rows = [];
+            for (const task of state.tasks) {
+                const recurring = isRecurringTask(task);
+                const done = isTaskCompletedComputed(task);
+
+                if (scope === 'donePlusRecurring') {
+                    if (!(done || recurring)) continue;
+                }
+                if (scope === 'done' && !done) continue;
+                if (scope === 'recurring' && !recurring) continue;
+
+                const imp = typeof task.importance === 'number' ? task.importance : 3;
+                let metric = recurring ? getRecurringMetric(task) : getNormalMetric(task);
+
+                let completedKey = null;
+                let overdueDays = null;
+                let dueKey = null;
+
+                if (!recurring) {
+                    if (done) {
+                        if (task.completedAt) completedKey = String(task.completedAt).slice(0, 10);
+                        else if (task.ddl) completedKey = String(task.ddl).slice(0, 10);
+                    }
+                    dueKey = task.ddl ? String(task.ddl).slice(0, 10) : null;
+                    if (done && task.ddl && completedKey) overdueDays = calcOverdueDays(String(task.ddl).slice(0, 10), completedKey);
+                } else {
+                    // 周期任务：用最近一次打卡作为“完成时间”的展示（不代表结束完成）
+                    ensureTaskCheckins(task);
+                    completedKey = task.checkins.length ? task.checkins[task.checkins.length - 1] : null;
+                    // 逾期列：展示当前漏打卡/延时后的滞后天数
+                    dueKey = getTaskEffectiveDueKey(task);
+                    if (dueKey && todayKey && dueKey < todayKey) {
+                        const diff = Math.floor((parseDateOnly(todayKey).getTime() - parseDateOnly(dueKey).getTime()) / MS_PER_DAY);
+                        overdueDays = diff > 0 ? diff : 0;
+                    } else {
+                        overdueDays = 0;
+                    }
+                }
+
+                rows.push({
+                    type: recurring ? '打卡' : '普通',
+                    importance: imp,
+                    title: task.title || '',
+                    metricPct: metric.pct,
+                    metricLabel: metric.label,
+                    dueKey: dueKey,
+                    completedKey: completedKey,
+                    overdueDays: overdueDays,
+                    isDone: done,
+                    isRecurring: recurring
+                });
+            }
+            return rows;
+        }
+
+        function sortStatsRows(rows, sortKey) {
+            const arr = [...rows];
+            if (sortKey === 'importanceDesc') {
+                arr.sort((a, b) => (b.importance || 0) - (a.importance || 0));
+            } else if (sortKey === 'completedDesc') {
+                // YYYY-MM-DD 字符串可直接比较；空值排最后
+                arr.sort((a, b) => {
+                    const ak = a.completedKey || '';
+                    const bk = b.completedKey || '';
+                    if (!ak && !bk) return 0;
+                    if (!ak) return 1;
+                    if (!bk) return -1;
+                    return bk.localeCompare(ak);
+                });
+            } else if (sortKey === 'overdueDesc') {
+                arr.sort((a, b) => (b.overdueDays ?? -1) - (a.overdueDays ?? -1));
+            } else if (sortKey === 'metricDesc') {
+                arr.sort((a, b) => (b.metricPct || 0) - (a.metricPct || 0));
+            } else if (sortKey === 'titleAsc') {
+                arr.sort((a, b) => String(a.title).localeCompare(String(b.title)));
+            }
+            return arr;
+        }
+
+        function renderStats(isAutoRefresh = false) {
+            if (!DOM.tabStats || DOM.tabStats.classList.contains('hidden')) return;
+
+            const scope = (DOM.statsScope && DOM.statsScope.value) ? DOM.statsScope.value : 'done';
+            const sortKey = (DOM.statsSort && DOM.statsSort.value) ? DOM.statsSort.value : 'importanceDesc';
+
+            const rawDueRange = DOM.statsDueRange ? parseInt(DOM.statsDueRange.value, 10) : 51;
+            const dueUnlimited = !Number.isFinite(rawDueRange) || rawDueRange >= 51;
+            const dueRangeDays = dueUnlimited ? null : Math.max(0, rawDueRange);
+            if (DOM.statsDueRangeText) {
+                if (dueUnlimited) DOM.statsDueRangeText.textContent = '不限';
+                else if (dueRangeDays === 0) DOM.statsDueRangeText.textContent = '今天';
+                else DOM.statsDueRangeText.textContent = `近 ${dueRangeDays} 天`;
+            }
+
+            const chartDays = DOM.statsChartDays ? parseInt(DOM.statsChartDays.value, 10) : 30;
+            if (DOM.statsChartDaysText) DOM.statsChartDaysText.textContent = `${chartDays} 天`;
+
+            const today = getToday0();
+            const todayKey = toDateKey(today);
+
+            // 顶部卡片：固定统计（全局口径）
+            const doneNormal = state.tasks.filter(t => !isRecurringTask(t) && isTaskCompletedComputed(t)).length;
+            const activeRecurring = state.tasks.filter(t => isRecurringTask(t) && !isTaskCompletedComputed(t)).length;
+
+            const recurringAll = state.tasks.filter(t => isRecurringTask(t));
+            let sumExpected = 0;
+            let sumDone = 0;
+            for (const t of recurringAll) {
+                sumExpected += getRecurringExpectedCount(t, today);
+                sumDone += getRecurringDoneCount(t, today);
+            }
+            const recurringRate = sumExpected > 0 ? Math.round((sumDone / sumExpected) * 100) : 0;
+
+            // 平均逾期：对“所有已完成普通事件”求平均（含 0 天按时完成）
+            const overdueAll = [];
+            for (const t of state.tasks) {
+                if (isRecurringTask(t)) continue;
+                if (!isTaskCompletedComputed(t)) continue;
+                if (!t.ddl || !t.completedAt) continue;
+                const d = calcOverdueDays(String(t.ddl).slice(0, 10), String(t.completedAt).slice(0, 10));
+                if (typeof d === 'number') overdueAll.push(d);
+            }
+            const avgOverdue = overdueAll.length ? (Math.round((overdueAll.reduce((a, b) => a + b, 0) / overdueAll.length) * 10) / 10) : null;
+
+            if (DOM.statsDoneNormal) DOM.statsDoneNormal.textContent = String(doneNormal);
+            if (DOM.statsActiveRecurring) DOM.statsActiveRecurring.textContent = String(activeRecurring);
+            if (DOM.statsRecurringRate) DOM.statsRecurringRate.textContent = `${recurringRate}%`;
+            if (DOM.statsAvgOverdue) DOM.statsAvgOverdue.textContent = (avgOverdue === null) ? '-' : `${avgOverdue} 天`;
+
+            // 图表：重要度分布（已完成口径）
+            if (DOM.statsImportanceBars) {
+                const doneRows = buildStatsRows('done');
+                const byImp = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                doneRows.forEach(r => { byImp[r.importance] = (byImp[r.importance] || 0) + 1; });
+                const max = Math.max(1, ...Object.values(byImp));
+                DOM.statsImportanceBars.innerHTML = [5,4,3,2,1].map(i => {
+                    const n = byImp[i] || 0;
+                    const w = Math.round((n / max) * 100);
+                    return `
+                        <div class="barline">
+                            <div class="label">${i}级</div>
+                            <div class="barwrap"><div class="bar" style="width:${w}%"></div></div>
+                            <div class="num">${n}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 图表：类型占比（全局口径）
+            if (DOM.statsTypeBars) {
+                const normalTotal = state.tasks.filter(t => !isRecurringTask(t)).length;
+                const recurringTotal = recurringAll.length;
+                const total = Math.max(1, normalTotal + recurringTotal);
+                const normalW = Math.round((normalTotal / total) * 100);
+                const recurringW = 100 - normalW;
+                DOM.statsTypeBars.innerHTML = `
+                    <div class="barline">
+                        <div class="label">普通</div>
+                        <div class="barwrap"><div class="bar" style="width:${normalW}%"></div></div>
+                        <div class="num">${normalTotal}</div>
+                    </div>
+                    <div class="barline">
+                        <div class="label">打卡</div>
+                        <div class="barwrap"><div class="bar bar2" style="width:${recurringW}%"></div></div>
+                        <div class="num">${recurringTotal}</div>
+                    </div>
+                    <div class="muted" style="margin-top:6px;color:var(--text-secondary);font-size:0.78rem;">截至 ${todayKey}（打卡率为累计应打卡/已打卡）</div>
+                `;
+            }
+
+            // 表格
+            let rows = buildStatsRows(scope);
+
+            // 预计结束过滤：过去 N 天内（含今天），51=不限
+            if (dueRangeDays !== null) {
+                rows = rows.filter(r => {
+                    if (!r.dueKey) return false;
+                    // d = (today - due)
+                    const d = daysBetweenKeys(r.dueKey, todayKey);
+                    return typeof d === 'number' && d >= 0 && d <= dueRangeDays;
+                });
+            }
+            rows = sortStatsRows(rows, sortKey);
+
+            if (DOM.statsNote) {
+                const label = scope === 'donePlusRecurring'
+                    ? '已完成+打卡'
+                    : (scope === 'done' ? '已完成' : (scope === 'recurring' ? '打卡' : '全部'));
+                const rangeNote = (dueRangeDays !== null && dueRangeDays > 0) ? `，预计结束在过去${dueRangeDays}天` : (dueRangeDays === 0 ? '，预计结束=今天' : '');
+                DOM.statsNote.textContent = `${label}：${rows.length} 条${rangeNote}${isAutoRefresh ? '（自动刷新）' : ''}`;
+            }
+            if (DOM.statsTbody) {
+                DOM.statsTbody.innerHTML = rows.map(r => {
+                    const overdueText = (r.overdueDays === null || typeof r.overdueDays === 'undefined') ? '-' : String(r.overdueDays);
+                    const completedText = r.completedKey ? r.completedKey : (r.type === '打卡' ? '-' : '-');
+                    const metricText = r.metricLabel || '-';
+                    const dueText = r.dueKey ? r.dueKey : '-';
+                    return `
+                        <tr>
+                            <td>${r.type}</td>
+                            <td>${r.importance}</td>
+                            <td>${escapeHtml(r.title)}<div class="muted">${r.isDone ? '已完成' : '未完成'}</div></td>
+                            <td>${metricText}</td>
+                            <td>${dueText}</td>
+                            <td>${completedText}</td>
+                            <td>${overdueText}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // 勤奋值折线：滚动 7 天
+            if (DOM.statsDiligenceChart) {
+                const windowDays = 7;
+                const days = Math.max(7, Math.min(90, chartDays || 30));
+                const start = new Date(today.getTime() - (days - 1) * MS_PER_DAY);
+
+                // 预计算：普通任务完成分布（按完成日）
+                const normalDoneByDay = new Map();
+                const normalOnTimeByDay = new Map();
+                const impSumByDay = new Map();
+                const overdueSumByDay = new Map();
+                for (const t of state.tasks) {
+                    if (isRecurringTask(t)) continue;
+                    if (!isTaskCompletedComputed(t)) continue;
+                    if (!t.completedAt) continue;
+                    const doneKey = String(t.completedAt).slice(0, 10);
+                    const imp = typeof t.importance === 'number' ? t.importance : 3;
+                    const ddlKey = t.ddl ? String(t.ddl).slice(0, 10) : null;
+                    const overdue = (ddlKey && doneKey) ? (calcOverdueDays(ddlKey, doneKey) ?? 0) : 0;
+                    normalDoneByDay.set(doneKey, (normalDoneByDay.get(doneKey) || 0) + 1);
+                    if (overdue === 0) normalOnTimeByDay.set(doneKey, (normalOnTimeByDay.get(doneKey) || 0) + 1);
+                    impSumByDay.set(doneKey, (impSumByDay.get(doneKey) || 0) + imp);
+                    overdueSumByDay.set(doneKey, (overdueSumByDay.get(doneKey) || 0) + (overdue || 0));
+                }
+
+                // 预计算：打卡次数分布（按 checkin 日）
+                const checkinByDay = new Map();
+                for (const t of state.tasks) {
+                    if (!isRecurringTask(t)) continue;
+                    ensureTaskCheckins(t);
+                    for (const k of t.checkins) {
+                        checkinByDay.set(k, (checkinByDay.get(k) || 0) + 1);
+                    }
+                }
+
+                const labels = [];
+                const values = [];
+                for (let i = 0; i < days; i++) {
+                    const d = new Date(start.getTime() + i * MS_PER_DAY);
+                    const key = toDateKey(d);
+                    labels.push(`${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`);
+
+                    // 计算滚动窗口 [i-windowDays+1, i]
+                    let done7 = 0;
+                    let onTime7 = 0;
+                    let imp7 = 0;
+                    let overdue7 = 0;
+                    let checkin7 = 0;
+                    for (let j = Math.max(0, i - windowDays + 1); j <= i; j++) {
+                        const dj = new Date(start.getTime() + j * MS_PER_DAY);
+                        const k = toDateKey(dj);
+                        done7 += (normalDoneByDay.get(k) || 0);
+                        onTime7 += (normalOnTimeByDay.get(k) || 0);
+                        imp7 += (impSumByDay.get(k) || 0);
+                        overdue7 += (overdueSumByDay.get(k) || 0);
+                        checkin7 += (checkinByDay.get(k) || 0);
+                    }
+                    const onTimeRate = done7 > 0 ? (onTime7 / done7) : 1;
+                    const score = Math.round(onTimeRate * 9 + imp7 * 5 + checkin7 * 2 - overdue7 * 3);
+                    values.push(score);
+                }
+
+                DOM.statsDiligenceChart.innerHTML = makeLineChartSvg({ values, labels });
+            }
+        }
+
+        // Modal helpers
+        function openModal(mode, taskId) {
+            DOM.modalOverlay.classList.remove('hidden');
+            DOM.modalOverlay.style.display = 'flex';
+            DOM.modalTaskTitle.value = '';
+            DOM.modalTaskDesc.value = '';
+            // 默认DDL为明天
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            DOM.modalTaskDdl.valueAsDate = tomorrow;
+            // 默认重要度
+            if (DOM.modalTaskImportance) DOM.modalTaskImportance.value = 3;
+
+            // 默认循环：无穷大（不循环）
+            if (DOM.modalTaskCycle) DOM.modalTaskCycle.value = 0;
+            if (DOM.modalTaskCycleEnd) DOM.modalTaskCycleEnd.value = '';
+            if (DOM.modalCheckinDate) DOM.modalCheckinDate.valueAsDate = getToday0();
+
+            DOM.modalOverlay.dataset.mode = mode;
+            if (mode === 'edit') {
+                const task = state.tasks.find(t => t.id === taskId);
+                if (task) {
+                    DOM.modalTaskTitle.value = task.title || '';
+                    DOM.modalTaskDesc.value = task.description || '';
+                    DOM.modalTaskDdl.value = task.ddl || '';
+                    if (DOM.modalTaskImportance) DOM.modalTaskImportance.value = task.importance || 3;
+
+                    if (DOM.modalTaskCycle) DOM.modalTaskCycle.value = (isRecurringTask(task) ? task.cycleDays : 0);
+                    if (DOM.modalTaskCycleEnd) DOM.modalTaskCycleEnd.value = task.cycleEnd || '';
+                    ensureTaskCheckins(task);
+
+                    DOM.modalOverlay.dataset.editId = taskId;
+                    document.getElementById('modalTitleText').textContent = TEXTS.modalEditTitle;
+                }
+            } else {
+                document.getElementById('modalTitleText').textContent = TEXTS.modalCreateTitle;
+                delete DOM.modalOverlay.dataset.editId;
+            }
+
+            updateCycleUI();
+            DOM.modalTaskTitle.focus();
+        }
+
+        function closeModal() {
+            DOM.modalOverlay.classList.add('hidden');
+            DOM.modalOverlay.style.display = 'none';
+            if (DOM.modalCheckinSection) DOM.modalCheckinSection.classList.add('hidden');
+        }
+
+        function handleModalSave() {
+            const title = DOM.modalTaskTitle.value.trim();
+            if (!title) { SFX.unlock(); SFX.error(); alert('请输入事项标题'); DOM.modalTaskTitle.focus(); return; }
+            const desc = DOM.modalTaskDesc.value.trim();
+            const ddl = DOM.modalTaskDdl.value || null;
+
+            const rawCycle = DOM.modalTaskCycle ? parseInt(DOM.modalTaskCycle.value, 10) : 0;
+            const cycleDays = (Number.isFinite(rawCycle) && rawCycle > 0) ? rawCycle : null;
+            const cycleEnd = (cycleDays && DOM.modalTaskCycleEnd && DOM.modalTaskCycleEnd.value) ? DOM.modalTaskCycleEnd.value : null;
+
+            if (cycleDays && !ddl) { SFX.unlock(); SFX.error(); alert('周期事件必须设置首次DDL（作为第一次应打卡日期）'); return; }
+            if (cycleDays && cycleEnd) {
+                const first = parseDateOnly(ddl);
+                const end = parseDateOnly(cycleEnd);
+                if (first && end && end < first) { SFX.unlock(); SFX.error(); alert('周期结束时间不能早于首次DDL'); return; }
+            }
+
+            const mode = DOM.modalOverlay.dataset.mode || 'create';
+            if (mode === 'edit' && DOM.modalOverlay.dataset.editId) {
+                const id = DOM.modalOverlay.dataset.editId;
+                const task = state.tasks.find(t => t.id == id);
+                if (task) {
+                    task.title = title;
+                    task.description = desc;
+                    task.ddl = ddl;
+                    task.importance = DOM.modalTaskImportance ? parseInt(DOM.modalTaskImportance.value,10) : (task.importance || 3);
+
+                    // 循环字段
+                    task.cycleDays = cycleDays;
+                    task.cycleEnd = cycleEnd;
+                    if (!isRecurringTask(task)) {
+                        // 从周期切回普通任务：清理打卡与延时字段
+                        task.checkins = [];
+                        task.snoozeFor = null;
+                        task.snoozeUntil = null;
+                    } else {
+                        if (!Array.isArray(task.checkins)) task.checkins = [];
+                        ensureTaskCheckins(task);
+                        // 周期任务不使用原有 progress 完成逻辑
+                        task.progress = 0;
+                        task.completed = isTaskCompletedComputed(task);
+                    }
+
+                    saveTasks();
+                    renderTasks();
+                    closeModal();
+                    SFX.unlock();
+                    SFX.success();
+                    return;
+                }
+            }
+
+            // create
+            const newTask = {
+                id: Date.now() + Math.random(),
+                title: title,
+                description: desc,
+                ddl: ddl,
+                completed: false,
+                createdAt: new Date().toISOString(),
+                progress: 0,
+                importance: DOM.modalTaskImportance ? parseInt(DOM.modalTaskImportance.value,10) : 3,
+                cycleDays: cycleDays,
+                cycleEnd: cycleEnd,
+                checkins: [],
+                snoozeFor: null,
+                snoozeUntil: null
+            };
+
+            if (isRecurringTask(newTask)) {
+                newTask.progress = 0;
+                newTask.completed = false;
+            }
+
+            state.tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            closeModal();
+            SFX.unlock();
+            SFX.success();
+        }
+
+        // 顶栏立即添加功能已移除：请使用 modal（openCreateBtn）来新建事项
+
+        // 删除任务
+        function deleteTask(taskId) {
+            if (confirm('确定要删除这个事项吗？')) {
+                state.tasks = state.tasks.filter(t => t.id !== taskId);
+                saveTasks();
+                renderTasks();
+                SFX.unlock();
+                SFX.danger();
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const total = state.tasks.length;
+            const completed = state.tasks.filter(t => {
+                if (isRecurringTask(t)) return isTaskCompletedComputed(t);
+                return (t.progress === MAX_PROGRESS) || !!t.completed;
+            }).length;
+            
+            // 计算逾期任务（有DDL且未完成且DDL已过）
+            const overdue = state.tasks.filter(task => {
+                if (isTaskCompletedComputed(task)) return false;
+                const dueKey = getTaskEffectiveDueKey(task);
+                if (!dueKey) return false;
+                const ddlDate = parseDateOnly(dueKey);
+                const today = getToday0();
+                return ddlDate && ddlDate < today;
+            }).length;
+            
+            DOM.totalTasks.textContent = total;
+            DOM.completedTasks.textContent = completed;
+            DOM.overdueTasks.textContent = overdue;
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            // 清空任务列表
+            DOM.taskList.innerHTML = '';
+            
+            // 筛选任务
+            let filteredTasks = [...state.tasks];
+            
+            if (state.filter === 'pending') {
+                filteredTasks = filteredTasks.filter(task => !isTaskCompletedComputed(task));
+            } else if (state.filter === 'completed') {
+                filteredTasks = filteredTasks.filter(task => isTaskCompletedComputed(task));
+            }
+            
+            // 如果没有任务，显示空状态
+            if (filteredTasks.length === 0) {
+                DOM.taskList.appendChild(DOM.emptyState);
+                DOM.emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            // 排序任务
+            filteredTasks.sort((a, b) => {
+                if (state.sortBy === 'ddl') {
+                    // 按DDL排序，无DDL的排最后
+                    const ak = getTaskEffectiveDueKey(a);
+                    const bk = getTaskEffectiveDueKey(b);
+                    if (!ak && !bk) return 0;
+                    if (!ak) return 1;
+                    if (!bk) return -1;
+                    return parseDateOnly(ak) - parseDateOnly(bk);
+                } else if (state.sortBy === 'created') {
+                    // 按创建时间排序
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                } else if (state.sortBy === 'title') {
+                    // 按标题排序
+                    return a.title.localeCompare(b.title);
+                } else if (state.sortBy === 'importance') {
+                    // 按重要度排序（高优先）
+                    return (b.importance || 0) - (a.importance || 0);
+                }
+                return 0;
+            });
+            
+            // 渲染每个任务
+            filteredTasks.forEach(task => {
+                const taskElement = createTaskElement(task);
+                DOM.taskList.appendChild(taskElement);
+            });
+            
+            // 隐藏空状态
+            DOM.emptyState.classList.add('hidden');
+            
+            // 更新统计
+            updateStats();
+        }
+
+        // 创建任务元素
+        function createTaskElement(task) {
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            const computedCompleted = isTaskCompletedComputed(task);
+            if (computedCompleted) taskItem.classList.add('completed');
+            
+            // 不在任务卡片上打 urgent 类；使用 DDL 文本本身的 ddlClass 来显示“今天/明天/已过期”。
+            
+            // 格式化DDL显示
+            let ddlDisplay = TEXTS.noDdl;
+            let ddlClass = '';
+            const effectiveDueKey = getTaskEffectiveDueKey(task);
+            if (effectiveDueKey) {
+                const ddlDate = parseDateOnly(effectiveDueKey);
+                const today = getToday0();
+
+                if (ddlDate) {
+                    const timeDiff = ddlDate.getTime() - today.getTime();
+                    const dayDiff = Math.round(timeDiff / MS_PER_DAY);
+
+                    if (dayDiff === 0) {
+                        ddlDisplay = isRecurringTask(task) ? '今天需要打卡' : TEXTS.ddlToday;
+                        ddlClass = 'today';
+                    } else if (dayDiff < 0) {
+                        ddlDisplay = isRecurringTask(task)
+                            ? `漏打卡 ${Math.abs(dayDiff)} 天`
+                            : (typeof TEXTS.ddlOverdue === 'function' ? TEXTS.ddlOverdue(Math.abs(dayDiff)) : TEXTS.ddlOverdue);
+                        ddlClass = 'overdue';
+                    } else if (dayDiff === 1) {
+                        ddlDisplay = isRecurringTask(task) ? '明天需要打卡' : TEXTS.ddlTomorrow;
+                        ddlClass = 'tomorrow';
+                    } else {
+                        ddlDisplay = (typeof TEXTS.ddlInDays === 'function') ? TEXTS.ddlInDays(dayDiff) : `${dayDiff} 天后截止`;
+                    }
+
+                    ddlDisplay += ` (${toDateKey(ddlDate)})`;
+                }
+            }
+            
+            // 格式化创建时间
+            const createdDate = new Date(task.createdAt);
+            const createdDisplay = `${createdDate.getFullYear()}-${String(createdDate.getMonth()+1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
+            
+            // 进度百分比：普通任务按 MAX_PROGRESS；周期任务按 done/expected
+            const percentValue = getTaskProgressPercent(task);
+            // percentText/stage/icon 已移除：当前 UI 仅使用任务卡背景进度条
+
+            const recurring = isRecurringTask(task);
+            const actionText = recurring ? '打卡' : '+1';
+            const actionTitle = recurring ? '打卡（完成当前应完成的一次）' : '增加进度 (+1)';
+
+            // 周期任务：显示 3/5 类似的打卡统计（截至今天）
+            let cycleBadgeHtml = '';
+            if (recurring) {
+                const today = getToday0();
+                const expected = getRecurringExpectedCount(task, today);
+                const done = getRecurringDoneCount(task, today);
+                cycleBadgeHtml = `<span class="cycle-badge" title="打卡情况（截至今天）：${done}/${expected}">${done}/${expected}</span>`;
+            }
+
+            taskItem.innerHTML = `
+                <div class="task-progress-bg"><div class="task-progress-fill" style="width:${percentValue}%"></div></div>
+                <div class="task-content">
+                            <div class="task-header">
+                                <div class="task-title">${escapeHtml(task.title)}</div>
+                                <div class="task-actions">
+                                    <span class="progress-group">
+                                        <button class="task-action-btn progress-btn" title="${actionTitle}">${actionText}</button>
+                                    </span>
+                                    <button class="task-action-btn delay-btn" title="延时一天" aria-label="延时一天">⏰</button>
+                                    <button class="task-action-btn edit-btn" title="编辑事项" aria-label="编辑事项">✏️</button>
+                                    <button class="task-action-btn delete-btn" title="删除事项">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                    ${task.description ? `<div class="task-desc">${escapeHtml(task.description)}</div>` : ''}
+                    <div class="task-footer">
+                        <div class="task-ddl ${ddlClass}">
+                            <span aria-hidden="true">📅</span>
+                            <span>${ddlDisplay}</span>
+                        </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                ${cycleBadgeHtml}
+                                <div class="importance-badge importance-${task.importance}" title="重要度：${task.importance}">
+                                    <span class="imp-center">${task.importance >=4 ? '高' : (task.importance===3 ? '中' : '低')}</span>
+                                </div>
+                                <div class="task-created">
+                                    <span aria-hidden="true">🕒</span>
+                                    <span>${TEXTS.createdPrefix} ${createdDisplay}</span>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            `;
+
+            // 标记元素以便渲染后定位动画
+            taskItem.setAttribute('data-id', task.id);
+
+            // 绑定主按钮事件：普通任务=进度 +1；周期任务=打卡（只处理“当前应完成的第一个”）
+            const progressBtn = taskItem.querySelector('.progress-btn');
+            progressBtn.addEventListener('click', (ev) => {
+                SFX.unlock();
+                SFX.plus1();
+                // 记录点击位置（用于在重渲染后把特效释放在鼠标点击处）
+                let clickClientX = (ev && typeof ev.clientX === 'number') ? ev.clientX : 0;
+                let clickClientY = (ev && typeof ev.clientY === 'number') ? ev.clientY : 0;
+                // 键盘触发时 clientX/clientY 可能为 0：回退到按钮中心点
+                if (!clickClientX && !clickClientY) {
+                    const br = progressBtn.getBoundingClientRect();
+                    clickClientX = br.left + br.width / 2;
+                    clickClientY = br.top + br.height / 2;
+                }
+
+                if (isRecurringTask(task)) {
+                    ensureTaskCheckins(task);
+                    const scheduledKey = getRecurringNextScheduledKey(task);
+                    if (!scheduledKey) {
+                        SFX.unlock();
+                        SFX.error();
+                        return;
+                    }
+
+                    const todayKey = toDateKey(getToday0());
+                    const effectiveKey = getTaskEffectiveDueKey(task) || scheduledKey;
+                    if (effectiveKey && todayKey && effectiveKey > todayKey) {
+                        SFX.unlock();
+                        SFX.error();
+                        alert('未到打卡日期');
+                        return;
+                    }
+
+                    if (!task.checkins.includes(scheduledKey)) task.checkins.push(scheduledKey);
+                    task.checkins = uniqueSortedDateKeys(task.checkins);
+                    if (task.snoozeFor === scheduledKey) { task.snoozeFor = null; task.snoozeUntil = null; }
+                    task.progress = 0;
+                    task.completed = isTaskCompletedComputed(task);
+                    saveTasks();
+                    renderTasks();
+                } else {
+                    const wasCompleted = (task.progress === MAX_PROGRESS) || !!task.completed;
+                    if (typeof task.progress !== 'number') task.progress = task.completed ? MAX_PROGRESS : 0;
+                    if (task.progress < MAX_PROGRESS) {
+                        task.progress += 1;
+                    } else {
+                        task.progress = 0; // 循环重置
+                    }
+                    task.completed = (task.progress === MAX_PROGRESS);
+                    if (task.completed && !wasCompleted) {
+                        task.completedAt = new Date().toISOString();
+                    }
+                    if (!task.completed) {
+                        task.completedAt = null;
+                    }
+                    saveTasks();
+                    renderTasks();
+                }
+
+                // 渲染完成后添加动画到任务格子的进度填充元素与飞出 +1 文本
+                requestAnimationFrame(() => {
+                    const newEl = document.querySelector(`[data-id="${task.id}"]`);
+                    if (newEl) {
+                        const origin = getClickOrigin(newEl, clickClientX, clickClientY);
+
+                        const fill = newEl.querySelector('.task-progress-fill');
+                        if (fill) {
+                            fill.classList.add('pulse');
+                            fill.classList.add('glow');
+                            setTimeout(() => {
+                                fill.classList.remove('pulse');
+                                fill.classList.remove('glow');
+                            }, 450);
+                        }
+
+                        // 添加飞出文本
+                        const fly = document.createElement('div');
+                        fly.className = 'plus-fly';
+                        fly.textContent = isRecurringTask(task) ? '✓' : '+1';
+                        if (origin) {
+                            fly.style.left = origin.x + 'px';
+                            fly.style.top = origin.y + 'px';
+                        }
+                        newEl.appendChild(fly);
+
+                        // 波纹环（更浮夸一点）
+                        const ring = document.createElement('div');
+                        ring.className = 'ring-wave';
+                        if (origin) {
+                            ring.style.left = origin.x + 'px';
+                            ring.style.top = origin.y + 'px';
+                        }
+                        newEl.appendChild(ring);
+
+                        // 闪光 + 纸屑
+                        spawnSparkle(newEl, origin, task.completed);
+                        spawnConfetti(newEl, origin, task.completed ? 80 : 26, task.completed);
+
+                        // spawn particles using theme color; 增强完成时效果
+                        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--plus-color') || '#45c3dd';
+                        if (!isRecurringTask(task) && task.completed) {
+                            // 完成音效
+                            SFX.unlock();
+                            SFX.success();
+                            // 完成：粒子更多、更大、更远
+                            spawnParticles(newEl, themeColor.trim(), 120, 1, origin);
+                            // 双层波纹环
+                            const ring2 = document.createElement('div');
+                            ring2.className = 'ring-wave';
+                            ring2.style.borderColor = 'rgba(255,255,255,0.60)';
+                            ring2.style.animationDuration = '860ms';
+                            if (origin) {
+                                ring2.style.left = origin.x + 'px';
+                                ring2.style.top = origin.y + 'px';
+                            }
+                            newEl.appendChild(ring2);
+
+                            newEl.classList.add('complete-pop');
+                            document.body.classList.add('screen-bump');
+                            setTimeout(() => { newEl.classList.remove('complete-pop'); }, 560);
+                            setTimeout(() => { document.body.classList.remove('screen-bump'); }, 360);
+                            setTimeout(() => { if (ring2 && ring2.parentNode) ring2.parentNode.removeChild(ring2); }, 720);
+                        } else {
+                            spawnParticles(newEl, themeColor.trim(), 38, 0, origin);
+                        }
+
+                        if (isRecurringTask(task)) {
+                            // 周期任务：每次打卡都给一个成功反馈
+                            SFX.unlock();
+                            SFX.success();
+                        }
+                        setTimeout(() => { if (fly && fly.parentNode) fly.parentNode.removeChild(fly); }, 520);
+                        setTimeout(() => { if (ring && ring.parentNode) ring.parentNode.removeChild(ring); }, 520);
+                    }
+                });
+            });
+
+            // 延时一天
+            const delayBtn = taskItem.querySelector('.delay-btn');
+            if (delayBtn) {
+                delayBtn.addEventListener('click', () => {
+                    SFX.unlock();
+                    SFX.softClick();
+
+                    if (isRecurringTask(task)) {
+                        const scheduledKey = getRecurringNextScheduledKey(task);
+                        if (!scheduledKey) return;
+                        const baseKey = getTaskEffectiveDueKey(task) || scheduledKey;
+                        task.snoozeFor = scheduledKey;
+                        task.snoozeUntil = addDaysToKey(baseKey, 1);
+                    } else {
+                        const baseKey = (task.ddl ? String(task.ddl).slice(0,10) : toDateKey(getToday0()));
+                        task.ddl = addDaysToKey(baseKey, 1);
+                    }
+                    saveTasks();
+                    renderTasks();
+                });
+            }
+
+            // 绑定编辑按钮
+            const editBtn = taskItem.querySelector('.edit-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => { SFX.unlock(); SFX.click(); openModal('edit', task.id); });
+            }
+
+            // 不在任务卡片上打上 today/tomorrow 类，保留 DDL 文本本身的高亮（避免被进度动画覆盖）
+
+            // 绑定删除按钮
+            const deleteBtn = taskItem.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => { SFX.unlock(); SFX.click(); deleteTask(task.id); });
+
+            return taskItem;
+        }
+
+        // 导出任务数据
+        function exportTasks() {
+            const dataStr = JSON.stringify(state.tasks, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `schedule_tasks_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 导入任务数据
+        function importTasks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedTasks = JSON.parse(e.target.result);
+                    
+                    // 验证导入的数据格式
+                    if (!Array.isArray(importedTasks)) {
+                        throw new Error('导入的数据格式不正确');
+                    }
+                    
+                    // 合并任务（避免ID重复）
+                    const existingIds = new Set(state.tasks.map(t => t.id));
+                    const newTasks = importedTasks.filter(task => {
+                        if (!task.id || !task.title) return false;
+                        return !existingIds.has(task.id);
+                    });
+                    
+                    if (newTasks.length === 0) {
+                        SFX.unlock();
+                        SFX.error();
+                        alert('没有发现新的任务可以导入，或所有任务已存在。');
+                        return;
+                    }
+                    
+                    state.tasks.push(...newTasks);
+                    saveTasks();
+                    renderTasks();
+                    SFX.unlock();
+                    SFX.success();
+                    alert(`成功导入 ${newTasks.length} 个任务`);
+                    
+                    // 清空文件输入
+                    DOM.importFile.value = '';
+                } catch (e) {
+                    SFX.unlock();
+                    SFX.error();
+                    alert('导入失败：' + e.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // 简单的HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
